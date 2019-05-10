@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<style type="text/css">
+			 #china {
+			  fill: #E5F5F9;
+			  stroke: #2CA25F;
+			  stroke-width: 0.5;
+			}
+			#axes {
+			  stroke: #BDBDBD;
+			  stroke-width: 0.5;
+			}
+			.tooltip{
+				position: absolute;
+				width: 100px;
+				height: 20px;
+				line-height: 20px;
+				background: rgba(0,0,0,0.5);
+				color: #fff;
+				text-align: center;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="vis"></div>
+	</body>
+	<script src="https://d3js.org/d3.v5.min.js"></script>
+	<script type="text/javascript">
+		var w = 960;
+		var h = 750;
+		var proj = d3.geoMercator();
+		var path = d3.geoPath().projection(proj);
+		proj.center([107,41]) //set up center coordinate of map
+		var t = proj.translate(); // the projection's default translation
+		var s = proj.scale(750); // the projection's default scale
+
+		var map = d3.select("#vis").append("svg:svg")
+			.attr("width", w)
+			.attr("height", h);
+
+		var axes = map.append("svg:g").attr("id", "axes");
+		var china = map.append("svg:g").attr("id", "china");
+		
+		var tooltip = d3.select("body").append("div").attr("class", "tooltip");
+
+		d3.json("china.json").then(json=>{
+			 china.selectAll("path")
+							.data(json.features)
+							.enter().append("svg:path")
+							.attr("d", path)
+							.on("mouseover", function(d,i){
+								d3.select(this).attr("fill", "green");
+								tooltip.transition().duration(200).style("opacity", .9);
+								tooltip.html("<span>"+json.features[i].properties.name+"</span>")
+								.style('left', (d3.event.pageX+10)+"px")
+								.style('top', (d3.event.pageY)+"px")
+							}).on("mouseout", function(d,i){
+								d3.select(this).attr("fill", "#E5F5F9");
+								tooltip.transition().duration(200).style("opacity", 0);
+							});
+		}).then(e=>{
+			console.log(e)
+		});
+	</script>
+</html>
